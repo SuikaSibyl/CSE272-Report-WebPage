@@ -5,7 +5,7 @@
       <el-container>
       <el-container>
         <el-header>
-          <h1 id="Report For CSE 274">Implementation of BDPT and MMLT on GPU with<br/> Simple Primal Sample Space Nueral Mutation</h1>
+          <h1 id="Report For CSE 274">Implementation of BDPT and MMLT on GPU with<br/> Simple Primal Sample Space Latent Nueral Mutation</h1>
         </el-header>
         <el-container>
           <el-container>
@@ -32,11 +32,11 @@
                 </p>
                 <p style="text-align:left">
                   Then, <a href="#3.">Section 3</a> discussed something about normalizing flow and neural importance sampling. I will also show some results
-                  and comparison in 2D monochrome image case.
+                  and comparison in 2D monochrome image case. They are talked about because they are the basis of my "Latent Space Mutation" idea.
                 </p>
                 <p style="text-align:left">
-                  And <a href="#4.">Section 4</a> talks about "Latent Space Mutation", a (probably) new concept I proposed and why I think it might be useful.
-                  Some experiments are also shown both in 2D monochrome image case and single-depth MLT case (although turned out to be a failure ...).
+                  And <a href="#4.">Section 4</a> talks about "Latent Space Mutation", a (probably) new concept I proposed, and why I think it might be useful.
+                  Some experiments are also shown both in 2D monochrome image case and single-depth MMLT case.
                 </p>
               </el-row>
               <!-- Chapter 2: BDPT & MMLT -->
@@ -443,7 +443,7 @@
                 <p style="text-align:left">
                   Again when the underlying latent distribution <math-jax latex="Z"/> is equilibrium to a uniform distribution,
                   <math-jax latex="f(Z)=f(Z')=1"/> and <math-jax latex="T(Z\rightarrow Z')=T(Z'\rightarrow Z)=1"/>, and the classical acceptance ratio is again:
-                  <math-jax latex="a(Z\rightarrow Z')=1"/>. Which means we has 1 acceptance rate and 0 rejection rate when reaching equilibrium, while 
+                  <math-jax latex="a(Z\rightarrow Z')=1"/>. Which means we has 1 acceptance rate and 0 rejection rate, while 
                   still be able to exporling the neighbor space.
                 </p>
 
@@ -477,6 +477,33 @@
                 <p style="text-align:left">
                   To quickly verify the design, we do experiments on a simple monochrome 2D distribution.
                 </p>
+                <p style="text-align:left">
+                  The distribution tested is an anisotropy oval, the target distribution and the learned results are: 
+                </p>
+              </el-row>
+              <el-row class="row-bg" justify="center">
+                <el-col :span="10">
+                  <el-image style="align:center" src="https://imagehost-suikasibyl-us.oss-us-west-1.aliyuncs.com/img/20230325213419.png" />
+                  <p><code>
+                    Left: the target distribution <br/>
+                    Right : the learned distribution.
+                  </code></p>
+                  </el-col>
+                </el-row>
+              <el-row class="row-bg" justify="left">
+                <p style="text-align:left">
+                  The results are also very good. We could observe both reconstruction results and acceptance rates are relatively better when we adopt
+                  the neural latent space sampling:
+                </p>
+              </el-row>
+              <el-row class="row-bg" justify="center">
+                <el-col :span="12">
+                  <el-image style="align:center" src="https://imagehost-suikasibyl-us.oss-us-west-1.aliyuncs.com/img/20230325213359.png" />
+                  </el-col>
+                </el-row>
+              <el-row class="row-bg" justify="left">
+                <p style="text-align:left">
+                </p>
               </el-row>
               
               <el-row class="row-bg" justify="left">
@@ -488,7 +515,7 @@
                   I also tried to use the neural mutation to mutate the Metropolis Light Transport. The result is not very good, but I think it is still worth to share.
                 </p>
                 <p style="text-align:left">
-                  It is actually quite a disaster when implementating this: NaNs are everywhere. As soon as I raise the dimension from 2D to 48-dim, the gradient is unstable,
+                  It is actually quite a disaster when implementating this: NaNs are everywhere. As soon as I raise the dimension from 2D to 48-dim, the gradient becomes unstable,
                   if the layers are too deep, NaNs will quickly appear in gradients and then in loss, as far as I checked it is kind of related to logit-sigmoid mapping
                   which do exponential operations. As a result I only use 4 coupling layers with 48 dimensions (I use at most 48 PSS random variables for a path).
                 </p>
@@ -595,9 +622,9 @@
 
               <el-row class="row-bg" justify="left">
                 <p style="text-align:left">
-                  I think a possible reason is by RealNVP converges to something "no regular". Here "optimal transport" might be a more accurate
-                  word. We could see in practice that the mapping does not go in the optimal transport way, but getting somme strange distortion.
-                  They would produce quite similar approaching to the target distribution, and this is not a problem for importance sampling.
+                  I think a possible reason is by RealNVP converges to something "not regular". Here "optimal transport" might be a more accurate
+                  word. We could see in practice that the mapping does not go in the optimal transport way, but result in somme strange distortion.
+                  They would have quite similar distribution with the target distribution, and this is not a problem for importance sampling.
                 </p>
               </el-row>
 
@@ -622,7 +649,7 @@
                 <p style="text-align:left">
                   To solve this, I should try to constraint the neural network to do optimal transport.
                   There are already some works on this, like OT-Flow  <a href="#cite-otflow">[11]</a> and CP-Flow <a href="#cite-cpflow">[12]</a>.
-                  But I did not have time to read them yet.
+                  But I did not have time to read them yet. Let's leave this as future work.
                 </p>
               </el-row>
 
@@ -635,7 +662,7 @@
                   Clearly the project is not completed yet. Here are some possible future works to do:
                 </p>
                 <p style="text-align:left">
-                  (1). Check the transition probability whether need Jacobian. <br/>
+                  (1). Check the transition probability whether need Jacobian. (I guess the answer is yes)<br/>
                   (2). Try more on the forward training and piecewise-polynomial coupling layer. <br/>
                   (3). Try non-neural importance mapping (like cosine-weighted or Gaussian like mapping ?). <br/>
                   (4). Try training a more powerful and efficient high-dim model. <br/>
